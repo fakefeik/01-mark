@@ -41,5 +41,13 @@ namespace _01_mark
             var textFormatted = "<p>sometext</p><p>New Parahraph</p><p>someothertext</p>";
             Assert.AreEqual(string.Format(header, textFormatted), MarkdownProccessor.ToHtml(text));
         }
+
+        [Test]
+        public void Test_paragraph_whitespaces()
+        {
+            var text = "sometext  \n\r    \n\r\t   NewText  \n   \n other";
+            var textFormatted = "<p>sometext  </p><p>\r\t   NewText  </p><p> other</p>";
+            Assert.AreEqual(string.Format(header, textFormatted), MarkdownProccessor.ToHtml(text));
+        }
     }
 }
