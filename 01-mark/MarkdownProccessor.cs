@@ -26,14 +26,14 @@ namespace _01_mark
 
         public static string AddParagraphs(string text)
         {
-            return text;
+            return String.Join("", Regex.Split(text, "\n\n").Select(x => string.Format("<p>{0}</p>", x)));
         }
 
         public static string ToHtml(string text)
         {
-            
+            if (string.IsNullOrEmpty(text))
+                return AddHeader("");
             return AddHeader(AddParagraphs(text));
-
         }
 
     }
