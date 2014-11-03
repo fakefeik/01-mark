@@ -26,7 +26,7 @@ namespace _01_mark
 
         public static string AddParagraphs(string text)
         {
-            return String.Join("", Regex.Split(text, "\n\n").Select(x => string.Format("<p>{0}</p>", x)));
+            return String.Join("", Regex.Split(text, @"\n\r*\s*\n").Select(x => string.Format("<p>{0}</p>", x)));
         }
 
         public static string ToHtml(string text)
