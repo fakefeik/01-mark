@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
@@ -13,8 +14,21 @@ namespace _01_mark
 {
     class MarkdownProccessor
     {
-        private static Stack<int> strings = new Stack<int>(); 
-        private static Dictionary<string, string> tags = new Dictionary<string, string> { { "_", "<em>"}, { "__", "<strong>" }, { "`", "<code>" } }; 
+        private static Stack<int> strings = new Stack<int>();
+        private static string open = "<{0}>";
+        private static string close = "</{0}>";
+        private static Dictionary<string, string> tags = new Dictionary<string, string> 
+        { 
+            { "_", "em"}, 
+            { "__", "strong" }, 
+            { "`", "code" } 
+        }; 
+        private static Dictionary<string, string> escape = new Dictionary<string, string>
+        {
+            //TODO: add some other stuff
+            { "<", "&lt" },
+            { ">", "&gt" }
+        }; 
 
 
         private static string AddHeader(string text)
@@ -54,13 +68,26 @@ namespace _01_mark
             return text;
         }
 
+        public static string ReplaceHtmlEscapeCharacters(string text)
+        {
+            foreach (var character in escape.Keys)
+            {
+                text = Regex.Replace(text, character, escape[character]);
+            }
+            return text;
+        }
+
         public static string AddParagraphs(string text)
         {
-            return String.Join("", Regex.Split(text, @"\n\r*\s*\n").Select(x => string.Format("<p>{0}</p>", x)).Select(Reformat));
+            return String.Join("", Regex.Split(text, @"\n\r*\s*\n")
+                .Select(ReplaceHtmlEscapeCharacters)
+                .Select(x => string.Format("<p>{0}</p>", x))
+                .Select(Reformat));
         }
 
         public static string ToHtml(string text)
         {
+            strings = new Stack<int>();
             if (string.IsNullOrEmpty(text))
                 return AddHeader("");
             return AddHeader(AddParagraphs(text));
