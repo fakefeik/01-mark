@@ -34,7 +34,23 @@ namespace _01_mark
         //TODO
         private static string Reformat(string text)
         {
-
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] == '_')
+                {
+                    if (strings.Count == 0 && (i == 0 || text[i - 1] == ' '))
+                        strings.Push(i);
+                    else if (strings.Count != 0 && (i == text.Length - 1 || text[i + 1] == ' '))
+                    {
+                        var prev = strings.Pop();
+                        text = text.Remove(i, 1);
+                        text = text.Remove(prev, 1);
+                        text = text.Insert(i - 1, "</em>");
+                        text = text.Insert(prev, "<em>");
+                    }
+                }
+            }
+            text = Regex.Replace(text, @"\\", "");
             return text;
         }
 
