@@ -12,7 +12,7 @@ using NUnit.Framework.Constraints;
 
 namespace _01_mark
 {
-    class MarkdownProccessor
+    class MarkdownProccessor : IMarkdownProcessor
     {
         private static Stack<int> strings = new Stack<int>();
         private static string open = "<{0}>";
@@ -68,7 +68,7 @@ namespace _01_mark
             return text;
         }
 
-        public static string ReplaceHtmlEscapeCharacters(string text)
+        private static string ReplaceHtmlEscapeCharacters(string text)
         {
             foreach (var character in escape.Keys)
             {
@@ -77,7 +77,7 @@ namespace _01_mark
             return text;
         }
 
-        public static string AddParagraphs(string text)
+        private static string AddParagraphs(string text)
         {
             return String.Join("", Regex.Split(text, @"\n\r*\s*\n")
                 .Select(ReplaceHtmlEscapeCharacters)
@@ -85,7 +85,7 @@ namespace _01_mark
                 .Select(Reformat));
         }
 
-        public static string ToHtml(string text)
+        public string ToHtml(string text)
         {
             strings = new Stack<int>();
             if (string.IsNullOrEmpty(text))

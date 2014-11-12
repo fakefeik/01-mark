@@ -27,7 +27,8 @@ namespace _01_mark
             var input = args[0];
             var output = args[1];
             var data = ReadFromFile(input);
-            var html = MarkdownProccessor.ToHtml(data);
+            var processor = new MarkdownProccessor();
+            var html = processor.ToHtml(data);
             WriteToFile(output, html);
         }
     }
