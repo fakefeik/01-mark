@@ -14,12 +14,12 @@ namespace _01_mark
 {
     class MarkdownProccessor : IMarkdownProcessor
     {
-        /*private static Dictionary<string, string> tags = new Dictionary<string, string> 
+        private static Dictionary<string, string> tags = new Dictionary<string, string> 
         { 
-            { "_", "em"}, 
+            { "_", "em" },
             { "__", "strong" }, 
             { "`", "code" } 
-        }; */
+        };
 
         private static string open = "<{0}>";
         private static string close = "</{0}>";
@@ -53,38 +53,32 @@ namespace _01_mark
             {
                 if (text[i] == '`')
                 {
-                    if ((strings.Count == 0 || strings.Peek().Item1 != "`") && (i == 0 || IsNotInWord(text[i - 1])))
-                        strings.Push(new Tuple<string, int>("`", i));
-                    else if (strings.Count != 0 && strings.Peek().Item1 == "`" && (i == text.Length - 1 || IsNotInWord(text[i + 1])))
-                    {
-                        var prev = strings.Pop().Item2;
-                        text = InsertTags(text, "code", prev, i, 1);
-                    }
+                    text = ReplaceMarkTags(text, "`", i);
                 }
                 if (text[i] == '_' && text[i + 1] == '_')
                 {
                     if (strings.Count != 0 && strings.Peek().Item1 == "`")
                         continue;
-                    if ((strings.Count == 0 || strings.Peek().Item1 != "__") && (i == 0 || IsNotInWord(text[i - 1])))
-                        strings.Push(new Tuple<string, int>("__", i));
-                    else if (strings.Count != 0 && strings.Peek().Item1 == "__" && (i == text.Length - 2 || IsNotInWord(text[i + 2])))
-                    {
-                        var prev = strings.Pop().Item2;
-                        text = InsertTags(text, "strong", prev, i, 2);
-                    }
+                    text = ReplaceMarkTags(text, "__", i);
                 }
                 else if (text[i] == '_')
                 {
                     if (strings.Count != 0 && strings.Peek().Item1 == "`")
                         continue;
-                    if ((strings.Count == 0 || strings.Peek().Item1 != "_") && (i == 0 || IsNotInWord(text[i - 1])))
-                        strings.Push(new Tuple<string, int>("_", i));
-                    else if (strings.Count != 0 && strings.Peek().Item1 == "_" && (i == text.Length - 1 || IsNotInWord(text[i + 1])))
-                    {
-                        var prev = strings.Pop().Item2;
-                        text = InsertTags(text, "em", prev, i, 1);
-                    }
+                    text = ReplaceMarkTags(text, "_", i);
                 }
+            }
+            return text;
+        }
+
+        private static string ReplaceMarkTags(string text, string tag, int i)
+        {
+            if ((strings.Count == 0 || strings.Peek().Item1 != tag) && (i == 0 || IsNotInWord(text[i - 1])))
+                strings.Push(new Tuple<string, int>(tag, i));
+            else if (strings.Count != 0 && strings.Peek().Item1 == tag && (i == text.Length - tag.Length || IsNotInWord(text[i + tag.Length])))
+            {
+                var prev = strings.Pop().Item2;
+                text = InsertTags(text, tags[tag], prev, i, tag.Length);
             }
             return text;
         }
