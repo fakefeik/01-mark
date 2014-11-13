@@ -1,36 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using NUnit.Framework.Constraints;
 
 namespace _01_mark
 {
     class MarkdownProccessor : IMarkdownProcessor
     {
-        private static Dictionary<string, string> tags = new Dictionary<string, string> 
+        private static readonly Dictionary<string, string> tags = new Dictionary<string, string> 
         { 
             { "_", "em" },
             { "__", "strong" }, 
             { "`", "code" } 
         };
-
-        private static string open = "<{0}>";
-        private static string close = "</{0}>";
-        private static Stack<Tuple<string, int>> strings = new Stack<Tuple<string, int>>(); 
-        private static Dictionary<string, string> escape = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> escape = new Dictionary<string, string>
         {
-            //TODO: add some other stuff
             { "<", "&lt" },
             { ">", "&gt" }
         }; 
-
+        private const string open = "<{0}>";
+        private const string close = "</{0}>";
+        private static Stack<Tuple<string, int>> strings = new Stack<Tuple<string, int>>(); 
 
         private static string AddHeader(string text)
         {
@@ -46,10 +36,9 @@ namespace _01_mark
             return string.Format(header, text);
         }
 
-        //TODO: refactor this
         private static string Reformat(string text)
         {
-            for (int i = 0; i < text.Length; i++)
+            for (var i = 0; i < text.Length; i++)
             {
                 if (text[i] == '`')
                 {
@@ -99,11 +88,7 @@ namespace _01_mark
 
         private static string ReplaceHtmlEscapeCharacters(string text)
         {
-            foreach (var character in escape.Keys)
-            {
-                text = Regex.Replace(text, character, escape[character]);
-            }
-            return text;
+            return escape.Keys.Aggregate(text, (current, character) => Regex.Replace(current, character, escape[character]));
         }
 
         private static string AddParagraphs(string text)
