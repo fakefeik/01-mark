@@ -18,25 +18,15 @@ namespace _01_mark
             { "<", "&lt" },
             { ">", "&gt" }
         }; 
-        private const string open = "<{0}>";
-        private const string close = "</{0}>";
-        private static Stack<Tuple<string, int>> strings = new Stack<Tuple<string, int>>(); 
+
+        private Stack<Tuple<string, int>> strings = new Stack<Tuple<string, int>>(); 
 
         private static string AddHeader(string text)
         {
-            const string header = @"<!DOCTYPE html>
-<html>
-<head>
-<meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"">
-</head>
-<body>
-{0}
-</body>
-</html>";
-            return string.Format(header, text);
+            return string.Format(HtmlTags.Header, text);
         }
 
-        private static string Reformat(string text)
+        private string Reformat(string text)
         {
             for (var i = 0; i < text.Length; i++)
             {
@@ -60,7 +50,7 @@ namespace _01_mark
             return text;
         }
 
-        private static string ReplaceMarkTags(string text, string tag, int i)
+        private string ReplaceMarkTags(string text, string tag, int i)
         {
             if ((strings.Count == 0 || strings.Peek().Item1 != tag) && (i == 0 || IsNotInWord(text[i - 1])))
                 strings.Push(new Tuple<string, int>(tag, i));
@@ -80,9 +70,9 @@ namespace _01_mark
         private static string InsertTags(string text, string tag, int from, int to, int toDelete)
         {
             text = text.Remove(to, toDelete);
-            text = text.Insert(to, string.Format(close, tag));
+            text = text.Insert(to, string.Format(HtmlTags.Close, tag));
             text = text.Remove(from, toDelete);
-            text = text.Insert(from, string.Format(open, tag));
+            text = text.Insert(from, string.Format(HtmlTags.Open, tag));
             return text;
         }
 
@@ -91,7 +81,7 @@ namespace _01_mark
             return escape.Keys.Aggregate(text, (current, character) => Regex.Replace(current, character, escape[character]));
         }
 
-        private static string AddParagraphs(string text)
+        private string AddParagraphs(string text)
         {
             return String.Join("", Regex.Split(text, @"\n\r*\s*\n")
                 .Select(ReplaceHtmlEscapeCharacters)
