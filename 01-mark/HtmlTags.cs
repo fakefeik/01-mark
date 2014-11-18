@@ -19,5 +19,16 @@ namespace _01_mark
 {0}
 </body>
 </html>";
+        public static readonly Dictionary<string, string> Tags = new Dictionary<string, string> 
+        { 
+            { "_", "em" },
+            { "__", "strong" }, 
+            { "`", "code" } 
+        };
+        public static readonly Dictionary<string, string> Escape = new Dictionary<string, string>
+        {
+            { "<", "&lt" },
+            { ">", "&gt" }
+        }; 
     }
 }

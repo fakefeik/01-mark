@@ -7,57 +7,43 @@ namespace _01_mark
 {
     class MarkdownProccessor : IMarkdownProcessor
     {
-        private static readonly Dictionary<string, string> tags = new Dictionary<string, string> 
-        { 
-            { "_", "em" },
-            { "__", "strong" }, 
-            { "`", "code" } 
-        };
-        private static readonly Dictionary<string, string> escape = new Dictionary<string, string>
-        {
-            { "<", "&lt" },
-            { ">", "&gt" }
-        }; 
-
-        private Stack<Tuple<string, int>> strings = new Stack<Tuple<string, int>>(); 
-
         private static string AddHeader(string text)
         {
             return string.Format(HtmlTags.Header, text);
         }
 
-        private string Reformat(string text)
+        private string Reformat(string text, Stack<Tuple<string, int>> strings)
         {
             for (var i = 0; i < text.Length; i++)
             {
                 if (text[i] == '`')
                 {
-                    text = ReplaceMarkTags(text, "`", i);
+                    text = ReplaceMarkTags(text, "`", i, strings);
                 }
                 if (text[i] == '_' && text[i + 1] == '_')
                 {
                     if (strings.Count != 0 && strings.Peek().Item1 == "`")
                         continue;
-                    text = ReplaceMarkTags(text, "__", i);
+                    text = ReplaceMarkTags(text, "__", i, strings);
                 }
                 else if (text[i] == '_')
                 {
                     if (strings.Count != 0 && strings.Peek().Item1 == "`")
                         continue;
-                    text = ReplaceMarkTags(text, "_", i);
+                    text = ReplaceMarkTags(text, "_", i, strings);
                 }
             }
             return text;
         }
 
-        private string ReplaceMarkTags(string text, string tag, int i)
+        private string ReplaceMarkTags(string text, string tag, int i, Stack<Tuple<string, int>> strings)
         {
             if ((strings.Count == 0 || strings.Peek().Item1 != tag) && (i == 0 || IsNotInWord(text[i - 1])))
                 strings.Push(new Tuple<string, int>(tag, i));
             else if (strings.Count != 0 && strings.Peek().Item1 == tag && (i == text.Length - tag.Length || IsNotInWord(text[i + tag.Length])))
             {
                 var prev = strings.Pop().Item2;
-                text = InsertTags(text, tags[tag], prev, i, tag.Length);
+                text = InsertTags(text, HtmlTags.Tags[tag], prev, i, tag.Length);
             }
             return text;
         }
@@ -78,24 +64,24 @@ namespace _01_mark
 
         private static string ReplaceHtmlEscapeCharacters(string text)
         {
-            return escape.Keys.Aggregate(text, (current, character) => Regex.Replace(current, character, escape[character]));
+            return HtmlTags.Escape.Keys.Aggregate(text, (current, character) => Regex.Replace(current, character, HtmlTags.Escape[character]));
         }
 
-        private string AddParagraphs(string text)
+        private string AddParagraphs(string text, Stack<Tuple<string, int>> strings)
         {
             return String.Join("", Regex.Split(text, @"\n\r*\s*\n")
                 .Select(ReplaceHtmlEscapeCharacters)
                 .Select(x => string.Format("<p>{0}</p>", x))
-                .Select(Reformat)
+                .Select(x => Reformat(x, strings))
                 .Select(x => Regex.Replace(x , @"\\", "")));
         }
 
         public string ToHtml(string text)
         {
-            strings = new Stack<Tuple<string, int>>();
+            var strings = new Stack<Tuple<string, int>>();
             if (string.IsNullOrEmpty(text))
                 return AddHeader("");
-            return AddHeader(AddParagraphs(text));
+            return AddHeader(AddParagraphs(text, strings));
         }
     }
 }
